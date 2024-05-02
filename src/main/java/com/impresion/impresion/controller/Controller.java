@@ -76,7 +76,7 @@ public class Controller {
                 .writeLF("Fecha: "+fecha)
                 .writeLF("Vendedor: "+vendedor);
 
-        if(mesa.equalsIgnoreCase("DOMICILIO")) {
+        if(mesa.toLowerCase().contains("domi")) {
             escpos.writeLF(mesa);
         } else {
             escpos.writeLF("Mesa: "+mesa);
@@ -125,9 +125,13 @@ public class Controller {
 
         //DISCRIMINACION DE PAGOS
         escpos.writeLF(subtotalConEspacios)
-                .writeLF(impuestosConEspacios)
-                .writeLF(propinaConEspacios)
-                .writeLF(bold, totalConEspacios);
+                .writeLF(impuestosConEspacios);
+
+        if(compraDto.getCliente() == null) {
+            escpos.writeLF(propinaConEspacios);
+        }
+
+        escpos.writeLF(bold, totalConEspacios);
 
         //DISCRIMINACION DE IMPUESTOS
         escpos.writeLF("------------------------------------------------")
