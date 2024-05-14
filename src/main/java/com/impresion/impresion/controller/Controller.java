@@ -6,6 +6,9 @@ import com.github.anastaciocintra.escpos.Style;
 import com.github.anastaciocintra.output.PrinterOutputStream;
 import com.impresion.impresion.dto.CompraImpresionDto;
 import com.impresion.impresion.dto.PedidoImpresionDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,15 +18,15 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class Controller {
 
     @PostMapping("/print")
-    public void print(@RequestBody CompraImpresionDto compraDto) throws IOException {
-
-        System.out.println(compraDto.toString());
+    public ResponseEntity<?> print(@RequestBody CompraImpresionDto compraDto) throws IOException {
 
         PrintService printService = PrinterOutputStream.getPrintServiceByName("GP-L80250 Series");
         PrinterOutputStream printerOutputStream = new PrinterOutputStream(printService);
@@ -49,17 +52,13 @@ public class Controller {
                 .setBold(true);
 
         String nombreEmpresa = "CALDERO CHORREANTE";
-        String direccion = "AV. 1E #16A-19 CAOBOS";
-        String nit = "3046476489";
+        String direccion = "CALLE 18A #9-75 LA LIBERTAD";
+        String nit = "#######";
         String textoSuperior = "Responsable del Impuesto a las Ventas";
         String textoExtra = "Documento Equivalente Sistema POS";
         String numFactura = String.format("NUM-%06d", compraDto.getId_compra());
 
-        LocalTime fechaActual = LocalTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        String horaFormateada = fechaActual.format(formatter);
-
-        String fecha = compraDto.getFecha_compra().toString() + " " + horaFormateada;
+        String fecha = compraDto.getFecha_compra().toString() + " " + compraDto.getHora();
         String vendedor = compraDto.getMesero().getNombre()+" "+compraDto.getMesero().getApellido();
         String mesa = compraDto.getMesa().getNumero();
         String textCliente = "CONSUMIDOR FINAL";
@@ -138,6 +137,12 @@ public class Controller {
                 .writeLF(centerBold, "SISTEMA DE FACTURACION POS")
                 .feed(5)
                 .cut(EscPos.CutMode.FULL).close();
+
+        Map<String,Object> res = new HashMap();
+
+        res.put("message", "Impresión realizada con éxito");
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     public String ajustarTexto(String texto, int anchoMaximo) {
@@ -173,5 +178,13 @@ public class Controller {
         campo2 = String.format("%" + espaciosFaltantes + "s", campo2);
         // Concatenar los campos
         return campo1 + campo2;
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> testSSL()  {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "Hola mundo desde ssl");
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 }

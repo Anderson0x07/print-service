@@ -21,6 +21,8 @@ public class CompraImpresionDto {
 
     private LocalDate fecha_compra;
 
+    private String hora;
+
     @Positive
     private double total;
 
